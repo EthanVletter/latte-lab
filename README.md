@@ -10,11 +10,13 @@ A miniature conveyor belt system demonstrating the future of shopfloor automatio
 
 ## Components Used
 
-- ESP32 Development Board
-- L298N/TB6612FNG Motor Driver
-- DC Gear Motor
-- Infrared/Motion Sensors
-- Industrial Push Buttons
+| Component                   | Description                                   | Purchase Link                                                   |
+| :-------------------------- | :-------------------------------------------- | :-------------------------------------------------------------- |
+| **ESP32 DevKit V1**         | Main microcontroller with WiFi/Bluetooth.     | [View on Amazon](https://www.amazon.com/s?k=esp32+devkit+v1)    |
+| **L298N Motor Driver**      | Dual H-Bridge driver for DC motor control.    | [View on Amazon](https://www.amazon.com/s?k=L298N+motor+driver) |
+| **DC Gear Motor**           | 6V-12V Motor for conveyor belt drive.         | [Insert link]()                                                 |
+| **PIR Motion Sensors**      | Infrared sensors for motion/object detection. | [Insert link]()                                                 |
+| **Industrial Push Buttons** | Manual override and start/stop controls.      | [Insert link]()                                                 |
 
 ## Installation Manual
 

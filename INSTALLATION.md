@@ -2,19 +2,26 @@
 
 ## 1. Software & Drivers
 
-### Arduino IDE
+To get the **Latte Lab** ecosystem running, ensure the following software is installed on your local machine and/or the server.
 
-- **Download:** [Arduino IDE Official Link](https://www.arduino.cc/en/software)
-- **ESP32 Driver (COM Port Fix):** If your computer doesn't see the ESP32 when plugged in via USB:
-  1. Download the **CP210x_Universal_Windows_Driver** driver from [Download and Install VCP Drivers](https://www.silabs.com/software-and-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads)
-  2. Extract and right-click-install the `.inf` installer.
-  3. Restart Arduino IDE.
+### Software Download Table
 
-### MQTT & Troubleshooting
+| Software          | Version                   | Purpose                               | Download Link                                                                                      |
+| :---------------- | :------------------------ | :------------------------------------ | :------------------------------------------------------------------------------------------------- |
+| **Arduino IDE**   | 2.x+                      | Firmware development & uploading.     | [Download](https://www.arduino.cc/en/software)                                                     |
+| **CP210x Driver** | Universal                 | ESP32 USB-to-Serial communication.    | [Download](https://www.silabs.com/software-and-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads) |
+| **Mosquitto**     | 2.1.2-install-windows.exe | MQTT Broker to handle messaging.      | [Download](https://mosquitto.org/download/)                                                        |
+| **MQTT Explorer** | Latest                    | Visualizing MQTT traffic & debugging. | [Download](http://mqtt-explorer.com/)                                                              |
 
-- **Mosquitto Broker:** [Download Link](https://mosquitto.org/download/) - Required to handle messaging.
-  1. Download the **mosquitto-2.1.2-install-windows-x64.exe**
-- **MQTT Explorer:** [Download Link](http://mqtt-explorer.com/) - Use this to visualize the data coming from the ESP32.
+<!-- | **OpenVPN**       | Latest    | Secure remote connection to the server. | [Download](https://openvpn.net/community-downloads/)                                               | -->
+
+## Driver Installation
+
+If your computer doesn't detect the ESP32 via USB:
+
+1. Download the **CP210x_Universal_Windows_Driver**.
+2. Extract the folder, right-click the `.inf` file, and select **Install**.
+3. Restart the Arduino IDE.
 
 ---
 
@@ -24,57 +31,50 @@
 
 Install these via the Library Manager (**Ctrl + Shift + I**):
 
-| Library Name | Author / Source    | Category | Purpose                                                      |
-| :----------- | ------------------ | -------- | ------------------------------------------------------------ |
-| ArduinoJson  | Benoit Blanchon    | External | Formatting and parsing JSON data for SAP & Web API.          |
-| PubSubClient | Nick O'Leary       | External | MQTT protocol for communication with the Mosquitto Broker.   |
-| WiFi         | Espressif Systems  | Built-in | Establishing connection to the local WiFi network.           |
-| WebServer    | Espressif Systems  | Built-in | Hosting the local HTML Dashboard on the ESP32.               |
-| ESPmDNS      | Espressif Systems  | Built-in | "Hostname discovery (e.g. accessing via saphexmotor.local)." |
-| Time         | Standard C Library | Built-in | Managing system timestamps and motor runtime tracking.       |
+| Library Name     | Author / Source    | Category | Purpose                                   |
+| :--------------- | :----------------- | :------- | :---------------------------------------- |
+| **ArduinoJson**  | Benoit Blanchon    | External | Formatting and parsing JSON data for SAP. |
+| **PubSubClient** | Nick O'Leary       | External | MQTT protocol communication.              |
+| **WiFi**         | Espressif Systems  | Built-in | Connecting to the local WiFi network.     |
+| **WebServer**    | Espressif Systems  | Built-in | Hosting the local HTML Dashboard.         |
+| **ESPmDNS**      | Espressif Systems  | Built-in | Hostname discovery (`latte-lab.local`).   |
+| **Time**         | Standard C Library | Built-in | System timestamps & runtime tracking.     |
 
-### Configuration Changes for New Devices
+### Configuration Changes (Credentials)
 
-To move the code to a new device/network, update these lines in `latte-lab/config.h`:
+To connect a new device to your network, update the `latte-lab/config.h` file.
 
-- `ssid`: Change to the new WiFi Name.
-- `password`: Change to the WiFi Password.
-- `mqtt_server`: Change to the IP Address of the computer running Mosquitto.
+> **Note:** If `config.h` does not exist, create it in the same folder as your `.ino` file and use the following template:
 
-  > **Example ssid:** Wifi@123
+```cpp
+// config.h - PRIVATE CREDENTIALS
+#ifndef CONFIG_H
+#define CONFIG_H
 
-  > **Example password:** password@123
+const char* ssid = "Wifi@123";               // Your WiFi Name
+const char* password = "password@123";       // Your WiFi Password
+// const char* mqtt_server = "192.168.56.1";
+const char* mqtt_server = "my-pc.local";     // Your PC Name or IP Address
 
-  > **Example mqtt_server:** my-pc.local or 192.168.56.1
-
-  ```bash
-  // config.h - PRIVATE CREDENTIALS
-    #ifndef CONFIG_H
-    #define CONFIG_H
-
-    const char* ssid = "Wifi@123";
-    const char* password = "password@123";
-    // const char* mqtt_server = "192.168.56.1";
-    const char* mqtt_server = "my-pc.local";
-
-    #endif
-  ```
-
----
+#endif
+```
 
 ## 3. Server & Network Configuration
 
-### Mosquitto Port Unblocking (Port 1883)
+### Firewall Setup (Port 1883)
+
+To allow the ESP32 to communicate with Mosquitto, you must open the port:
 
 1. Open **Windows Firewall with Advanced Security**.
-2. Go to **Inbound Rules** -> **New Rule**.
-3. Select **Port** -> **TCP** -> Specific local ports: **1883**.
-4. **Allow the connection** and name it "MQTT Broker (Mosquitto)".
+2. Navigate to **Inbound Rules** -> **New Rule**.
+3. Select **Port** -> **TCP**.
+4. Set the specific local port to **1883**.
+5. Select **Allow the connection** and name it: `"MQTT Broker (Mosquitto)"`.
 
-### Remote Connection
+### Remote Access
 
-- **VPN:** Connect via OpenVPN (Example: `10.8.x.x`).
-- **Remote Desktop (RDP):** Use the server IP provided to access the Matrikon OPC/Kepware environment.
+- **VPN:** Connect via **OpenVPN** to gain access to the internal factory network.
+- **RDP:** Use **Remote Desktop Connection** to access the server where Kepware and Matrikon are hosted.
 
 ---
 
@@ -82,28 +82,34 @@ To move the code to a new device/network, update these lines in `latte-lab/confi
 
 ### Kepware Configuration
 
-1. **Add IP:** In the MQTT Client Driver, ensure the "URL" matches the Mosquitto Broker IP.
+- **Add IP:** In the Kepware MQTT Client Driver, ensure the **URL** matches your Local device IP (e.g., `10.8.0.4`).
+- **Verification:** Use **Matrikon OPC Explorer** to verify that the tags are updating in real-time.
 
-   > **Example Host** 10.8.0.4
+### Restarting Kepware (2-Hour Trial Fix)
 
-   > **Example Port** 1883
+The Kepware trial service automatically stops every 2 hours. Use **Method A** first; if the Admin Tool is unresponsive, use **Method B**.
 
-2. **Browsing Tags:** Use **Matrikon OPC Explorer** to verify that tags are flowing. If you see the tags in Matrikon, they are ready for PCo.
+#### **Method A: Via System Tray (Standard)**
 
-### Restarting Kepware (2-Hour Limit Fix)
+1. Locate the **Kepware Admin Tool** icon in the Windows System Tray (bottom right).
+2. **Right-click** -> Select **Stop Runtime Service** (Select **Yes** when prompted about disconnecting clients).
+3. **Right-click** again -> Select **Start Runtime Service**.
 
-Kepware trial versions stop the runtime service every 2 hours.
+#### **Method B: Via Windows Services (Fail-safe)**
 
-- **How to restart:**
-  1. Look for the **Kepware Admin Tool** in the Windows System Tray (bottom right).
-  2. Right-click and select **Stop Runtime Service**.
-  - This operation will cause x active clients to be disconnected. Are you sure you want to continue? - `Yes`
-  3. In MatrikonOPC Explorer click on `File->Open->latte-lab.XML`
-  - Save Changes to session 'latte-lab.XML' - `No`
+1. Press **`Win + R`**, type `services.msc`, and hit Enter.
+2. Scroll down to find **KEPServerEX 6.xx Runtime**.
+3. **Right-click** the service and select **Restart**.
 
-### SAP Integration (PCo)
+#### **After Restarting:**
 
-1. **PCo Management Console:** Ensure the `Latte_Lab` "Agent" is Running and the status is "Green".
-2. **SAP T-Codes:**
+In **MatrikonOPC Explorer**, navigate to `File -> Open -> latte-lab.XML`.
 
-- Use `/n coopc1` to view the OPC Items that PCO is subscribed to view the live updates from the system.
+- _Note: Select **No** when asked to save changes to the session._
+
+## 5. SAP Integration (PCo)
+
+- **PCo Console:** Open the **SAP Plant Connectivity (PCo) Management Console** and ensure the `Latte_Lab` Agent is **Running** (indicated by a Green status).
+- **SAP Transaction Code:** Use T-Code **`/n coopc1`** in the SAP GUI to monitor the OPC Items and verify live shopfloor data updates.
+
+---
