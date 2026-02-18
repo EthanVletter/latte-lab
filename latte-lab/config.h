@@ -6,4 +6,5 @@
   const char* password = "YOUR_WIFI_PASSWORD";
   const char* mqtt_server = "YOUR_MQTT_SERVER_IP";
 
+  
 #endif
