@@ -7,20 +7,9 @@
 #include <time.h>
 
 // Network Credentials
-// const char* ssid = "Colab Wifi";
-// const char* password = "CLab@2021";
-
-// // const char* mqtt_server = "172.31.2.144";
-// const char* mqtt_server = "ethan-nb.local";
 #if __has_include("config.h")
   #include "config.h"
-#else
-  // 2. Mock data for the GitHub version
-  const char* ssid = "YOUR_WIFI_SSID";
-  const char* password = "YOUR_WIFI_PASSWORD";
-  const char* mqtt_server = "YOUR_MQTT_SERVER_IP";
 #endif
-
 
 // Pin Arrays
 // const int sensorPins[] = {22, 19, 18, 5, 4}; // 5 Sensors
