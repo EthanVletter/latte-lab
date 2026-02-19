@@ -42,7 +42,7 @@ Install these via the Library Manager (**Ctrl + Shift + I**):
 
 ### Configuration Changes (Credentials)
 
-To connect a new device to your network, update the `latte-lab/config.h` file.
+1. To connect a new device to your network, update the `latte-lab/config.h` file using **Arduino IDE**.
 
 > **Note:** If `config.h` does not exist, create it in the same folder as your `.ino` file and use the following template:
 
@@ -58,6 +58,26 @@ const char* mqtt_server = "my-pc.local";     // Your PC Name or IP Address
 
 #endif
 ```
+
+2. Verify/Compile: Before uploading, ensure there are no syntax errors.
+
+- Shortcut: Press `Ctrl + R` (or click the Checkmark icon).
+- Watch the output console at the bottom; it should say "Done compiling" in white text.
+
+3. Upload to ESP32:
+
+- Connect the ESP32 to your computer using a Micro-USB cable.
+- Ensure the correct Port is selected under Tools > Port.
+- Shortcut: Press `Ctrl + U` (or click the Right-Arrow icon).
+- Once the console says "Done uploading," the ESP32 will reboot and attempt to connect to your network.
+
+4. Monitor Live Output:
+
+- While the ESP32 is connected via Micro-USB, you can view real-time logs (IP address, MQTT status, sensor triggers) directly from the device.
+- Shortcut: Press `Ctrl + Shift + M` to open the Serial Monitor.
+- Baud Rate: Ensure the dropdown in the bottom-right of the Serial Monitor is set to 115200 baud.
+
+> If you see garbled text, double-check that the baud rate matches 115200.
 
 ## 3. Server & Network Configuration
 
@@ -94,6 +114,8 @@ The Kepware trial service automatically stops every 2 hours. Use **Method A** fi
 1. Locate the **Kepware Admin Tool** icon in the Windows System Tray (bottom right).
 2. **Right-click** -> Select **Stop Runtime Service** (Select **Yes** when prompted about disconnecting clients).
 3. **Right-click** again -> Select **Start Runtime Service**.
+4. Update the runtime with the loaded project following connect? (**Yes**)
+5. Save changes? (**No**)
 
 #### **Method B: Via Windows Services (Fail-safe)**
 
