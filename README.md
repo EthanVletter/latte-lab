@@ -40,7 +40,7 @@ _Note: Button wiring is pre-configured where Red is Power and Black is Ground._
 
 ## Resource Links
 
-- [Insert Resource Link]
-- [Insert Resource Link]
-- [Insert Resource Link]
-- [Insert Resource Link]
+- [t0nyz - Bambu Conveyor for EPS32](https://t0nyz.com/projects/year-2025/bambuconveyor)
+- [t0nyz - github.com/t0nyz0/Bambu-Poop-Conveyor-ESP32](https://github.com/t0nyz0/Bambu-Poop-Conveyor-ESP32)
+- [t0nyz - makerworld Bambu Poop Conveyor](https://makerworld.com/en/models/1071359-bambu-poop-conveyor-version-2-esp32-housing?from=search#profileId-1063585)
+- [Modular Conveyor System](<./docs/Flexible%20chain,%20modular%20conveyor%20system-KE%2050-Version%202%20(1)%20(1).pdf>)
