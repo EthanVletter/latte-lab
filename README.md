@@ -32,7 +32,7 @@ Correct grounding is critical to prevent ESP32 "brownouts" or sensor interferenc
 
 | Type           | Colors (In order of priority) |
 | :------------- | :---------------------------- |
-| **Ground**     | Black, Brown, Purple          |
+| **Ground**     | Black, Brown, Gray            |
 | **VCC (3.3V)** | Red, Orange, White            |
 | **Functions**  | Yellow, Blue, Green           |
 
