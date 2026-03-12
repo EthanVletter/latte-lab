@@ -4,9 +4,26 @@ A miniature conveyor belt system demonstrating the future of shopfloor automatio
 
 ## Visuals
 
-- [Insert Image of Wiring Setup]
-- [Insert Image of Dashboard]
-- [Wiring Diagrams](./images/wiring.png)
+<!-- - ![visual-1](./images/visual-1.jpeg)
+- ![visual-7](./images/visual-7.jpeg)
+- ![visual-6](./images/visual-6.jpeg) -->
+
+<p style="text-align: center;">
+
+<div align="center">
+    <img src="./images/visual-1.jpeg" alt="visual-1" width="600" height="450">
+</div>
+<div align="center">
+    <img src="./images/visual-7.jpeg" alt="visual-7" width="600" height="450">
+</div>
+<div align="center">
+    <img src="./images/visual-6.jpeg" alt="visual-6" width="600" height="450">
+</div>
+<div align="center">
+    <img src="./images/visual-12.jpeg" alt="visual-12" width="600" height="450">
+</div>
+
+</p>
 
 ## Components Used
 
@@ -44,3 +61,5 @@ _Note: Button wiring is pre-configured where Red is Power and Black is Ground._
 - [t0nyz - github.com/t0nyz0/Bambu-Poop-Conveyor-ESP32](https://github.com/t0nyz0/Bambu-Poop-Conveyor-ESP32)
 - [t0nyz - makerworld Bambu Poop Conveyor](https://makerworld.com/en/models/1071359-bambu-poop-conveyor-version-2-esp32-housing?from=search#profileId-1063585)
 - [Modular Conveyor System](<./docs/Flexible%20chain,%20modular%20conveyor%20system-KE%2050-Version%202%20(1)%20(1).pdf>)
+- [Chain assembly instruction](https://youtu.be/eQdI4LxynlE)
+- [Chain installation instruction](https://youtu.be/QmK309wBs9c)
