@@ -103,7 +103,13 @@ void setup() {
   
   // Initialize Buttons
   for (int i = 0; i < numButtons; i++)  {
-    pinMode(buttonPins[i], INPUT_PULLUP);
+    if (i == 0) {
+      // Master Button
+      pinMode(buttonPins[i], INPUT_PULLDOWN);
+    } else {
+      // Button 1-3
+      pinMode(buttonPins[i], INPUT_PULLUP);
+    }
     lastBtnStates[i] = digitalRead(buttonPins[i]); // Record initial state
   }
 
@@ -152,6 +158,8 @@ void loop() {
 
   // System is online: ensure LED is ON
   digitalWrite(statusLedPin, LOW);
+  // digitalWrite(statusLedPin, HIGH);
+
 
   // --- NON-BLOCKING PWM RAMP ENGINE ---
   if (millis() - lastRampTime >= rampInterval) {
@@ -179,10 +187,10 @@ void loop() {
   }
 
   // --- MASTER BUTTON LOGIC (Button 0 / Pin 25) ---
-  bool mainBtnActive = (digitalRead(buttonPins[0]) == LOW); 
+  bool mainBtnActive = (digitalRead(buttonPins[0]) == HIGH); 
 
   // Detect state change on Master Button
-  if (mainBtnActive != (lastBtnStates[0] == LOW)) {
+  if (mainBtnActive != (lastBtnStates[0] == HIGH)) {
     if (mainBtnActive) {
       // Button Pushed IN -> Start Motor
       lastButtonTrigger[0] = getTimestamp();
@@ -193,10 +201,10 @@ void loop() {
       lastTrigger = "MASTER STOP";
       sendMqttUpdate(); // Force immediate dashboard update
     }
-    lastBtnStates[0] = mainBtnActive ? LOW : HIGH;
+    lastBtnStates[0] = mainBtnActive ? HIGH : LOW;
   }
 
-  // --- REGULAR BUTTON LOGIC (Buttons 1 to 3) ---
+  // --- REGULAR BUTTON LOGIC (Buttons 1 to 3) ---  
   for (int i = 1; i < numButtons; i++) {
     bool currentState = digitalRead(buttonPins[i]);
     
@@ -211,10 +219,12 @@ void loop() {
   }
 
   // --- MOTION SENSOR LOGIC ---
+  bool motionDetected = false;
   for (int i = 0; i < numSensors; i++) {
     // Only allow sensors to trigger if Master Button is IN
     if (digitalRead(sensorPins[i]) == HIGH && mainBtnActive == true) {
       lastSensorTrigger[i] = getTimestamp();
+      motionDetected = true;
       
       if (motorRunning) {
         motorRunning = false;
@@ -224,6 +234,25 @@ void loop() {
         sendMqttUpdate(); 
       }
     }
+  }
+
+  // Control the Status LED based on the motion flag
+  if (motionDetected) {
+    // Flash the LED as a warning while motion is actively happening
+    if (millis() - lastLedBlink >= 500) { // Flashes every half-second
+      lastLedBlink = millis();
+      ledState = !ledState;
+      // digitalWrite(statusLedPin, ledState ? HIGH : LOW); // LOW is ON
+
+      digitalWrite(statusLedPin, HIGH); // Turn LED OFF
+      delay(250);
+      digitalWrite(statusLedPin, LOW);  // Turn LED ON
+      delay(250);
+    }
+  } else {
+    // No motion detected: System is clear, keep LED ALWAYS ON
+    digitalWrite(statusLedPin, LOW);
+    ledState = false; // Reset the blink state for next time
   }
 
   // --- MOTOR STATE TRACKING ---
@@ -303,7 +332,12 @@ void sendMqttUpdate() {
     StaticJsonDocument<128> btnDoc;
     String topic = "factory/button" + String(i);
     
-    btnDoc["status"] = (digitalRead(buttonPins[i]) == LOW) ? "ON" : "OFF";
+    if (i == 0) {
+      btnDoc["status"] = (digitalRead(buttonPins[i]) == HIGH) ? "ON" : "OFF";
+    } else {
+      btnDoc["status"] = (digitalRead(buttonPins[i]) == LOW) ? "ON" : "OFF";
+    }
+    
     btnDoc["last_activated"] = lastButtonTrigger[i]; 
     
     char btnBuffer[128];
