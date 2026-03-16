@@ -55,6 +55,15 @@ Correct grounding is critical to prevent ESP32 "brownouts" or sensor interferenc
 
 _Note: Button wiring is pre-configured where Red is Power and Black is Ground._
 
+### Master Push Button Wiring
+
+| Button Pin Name | Position on Button |       COnnected to       | Wire Colour      |
+| :-------------: | :----------------: | :----------------------: | ---------------- |
+|     IN NO1      |     (Top left)     | Connect to the 3.3V pin  | Red -> White     |
+|     NO NO1      |   (Bottom left)    | Connect to ESP32 Pin D25 | Red -> Blue      |
+|     IN NO2      |    (Top right)     | Connect to ESP32 Pin D13 | Black -> Yellow  |
+|     NO NO2      |   (Bottom Right)   |      Not Connected       | Black -> Nothing |
+
 ## Resource Links
 
 - [t0nyz - Bambu Conveyor for EPS32](https://t0nyz.com/projects/year-2025/bambuconveyor)
