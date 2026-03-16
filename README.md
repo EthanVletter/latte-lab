@@ -64,6 +64,8 @@ _Note: Button wiring is pre-configured where Red is Power and Black is Ground._
 |     IN NO2      |    (Top right)     | Connect to ESP32 Pin D13 | Black -> Yellow  |
 |     NO NO2      |   (Bottom Right)   |      Not Connected       | Black -> Nothing |
 
+_Note: The "Position on Button" is from the perspective of looking at the button_
+
 ## Resource Links
 
 - [t0nyz - Bambu Conveyor for EPS32](https://t0nyz.com/projects/year-2025/bambuconveyor)
