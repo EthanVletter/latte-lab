@@ -48,7 +48,7 @@ const int motorEnable = 15;
 // SYSTEM STATE VARIABLES
 // ==========================================
 // Motor Properties
-bool forwardDirection = false;       // Set to true/false for reverse
+bool forwardDirection = true;       // Set to true/false for reverse
 bool motorRunning = false;
 String lastTrigger = "None";
 
@@ -142,6 +142,9 @@ void setup() {
   server.on("/data", handleJSON);
   server.begin();
   MDNS.begin("latte-lab");
+
+  // System is online: ensure LED is ON
+  digitalWrite(statusLedPin, LOW);
 }
 
 // ==========================================
@@ -157,7 +160,7 @@ void loop() {
   client.loop();
 
   // System is online: ensure LED is ON
-  digitalWrite(statusLedPin, LOW);
+  // digitalWrite(statusLedPin, LOW);
   // digitalWrite(statusLedPin, HIGH);
 
 
@@ -242,12 +245,12 @@ void loop() {
     if (millis() - lastLedBlink >= 500) { // Flashes every half-second
       lastLedBlink = millis();
       ledState = !ledState;
-      // digitalWrite(statusLedPin, ledState ? HIGH : LOW); // LOW is ON
+      digitalWrite(statusLedPin, ledState ? HIGH : LOW); // LOW is ON
 
-      digitalWrite(statusLedPin, HIGH); // Turn LED OFF
-      delay(250);
-      digitalWrite(statusLedPin, LOW);  // Turn LED ON
-      delay(250);
+      // digitalWrite(statusLedPin, HIGH); // Turn LED OFF
+      // delay(250);
+      // digitalWrite(statusLedPin, LOW);  // Turn LED ON
+      // delay(250);
     }
   } else {
     // No motion detected: System is clear, keep LED ALWAYS ON
