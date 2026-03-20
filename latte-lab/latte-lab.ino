@@ -80,6 +80,9 @@ bool lastBtnStates[numButtons] = {HIGH, HIGH, HIGH, HIGH};
 unsigned long lastLedBlink = 0;
 bool ledState = false;
 
+// A global toggle to remember which server we are currently looking for
+bool usePrimaryMQTT = true;
+
 // ==========================================
 // SETUP ROUTINE
 // ==========================================
@@ -137,14 +140,14 @@ void setup() {
   Serial.println("NTP time synced!");
 
   // Setup MQTT & Web Server
-  client.setServer(mqtt_server, 1883);
+  // client.setServer(mqtt_server_1, 1883);
   server.on("/", handleRoot);
   server.on("/data", handleJSON);
   server.begin();
   MDNS.begin("latte-lab");
 
   // System is online: ensure LED is ON
-  digitalWrite(statusLedPin, LOW);
+  // digitalWrite(statusLedPin, LOW);
 }
 
 // ==========================================
@@ -156,6 +159,9 @@ void loop() {
   // Maintain MQTT Connection
   if (!client.connected()) {
     reconnectMQTT();
+
+    // System is online: ensure LED is ON
+    digitalWrite(statusLedPin, LOW);
   }
   client.loop();
 
@@ -225,7 +231,7 @@ void loop() {
   bool motionDetected = false;
   for (int i = 0; i < numSensors; i++) {
     // Only allow sensors to trigger if Master Button is IN
-    if (digitalRead(sensorPins[i]) == HIGH && mainBtnActive == true) {
+    if (digitalRead(sensorPins[i]) == LOW && mainBtnActive == true) {
       lastSensorTrigger[i] = getTimestamp();
       motionDetected = true;
       
@@ -353,7 +359,7 @@ void sendMqttUpdate() {
     StaticJsonDocument<128> snrDoc;
     String topic = "factory/sensor" + String(i+1);
     
-    snrDoc["status"] = (digitalRead(sensorPins[i]) == HIGH) ? "MOTION" : "CLEAR";
+    snrDoc["status"] = (digitalRead(sensorPins[i]) == LOW) ? "MOTION" : "CLEAR";
     snrDoc["last_activated"] = lastSensorTrigger[i]; 
     
     char snrBuffer[128];
@@ -362,9 +368,14 @@ void sendMqttUpdate() {
   }
 }
 
+
 void reconnectMQTT() {
   while (!client.connected()) {
-    Serial.println("Attempting MQTT connection...");
+    Serial.print("Attempting MQTT connection to: ");
+    Serial.println(usePrimaryMQTT ? mqtt_server_1 : mqtt_server_2);
+
+    // Explicitly aim at the current target before trying
+    client.setServer(usePrimaryMQTT ? mqtt_server_1 : mqtt_server_2, 1883);
     
     if (client.connect("ESP32_Motor_Unit")) {
       Serial.println("connected");
@@ -372,13 +383,24 @@ void reconnectMQTT() {
       Serial.print("failed, rc=");
       Serial.println(client.state());
 
-      // Fast blink 4 times (equals 2000ms delay)
-      for (int i = 0; i < 4; i++) {
-        digitalWrite(statusLedPin, LOW);  // ON
-        delay(250);
-        digitalWrite(statusLedPin, HIGH); // OFF
-        delay(250);
+      // // Fast blink 4 times (equals 2000ms delay)
+      // for (int i = 0; i < 4; i++) {
+      //   digitalWrite(statusLedPin, LOW);  // ON
+      //   delay(250);
+      //   digitalWrite(statusLedPin, HIGH); // OFF
+      //   delay(250);
+      // }
+
+          // Flash the LED while the connection is not set
+      if (millis() - lastLedBlink >= 400) { // Flashes every half-second
+        lastLedBlink = millis();
+        ledState = !ledState;
+        digitalWrite(statusLedPin, ledState ? HIGH : LOW); // LOW is ON
       }
+
+      // FLIP THE SWITCH: Change target to the OTHER laptop for the next loop!
+      usePrimaryMQTT = !usePrimaryMQTT; 
+      Serial.println("Switching target to the other MQTT server...");
     }
   }
 }
@@ -415,7 +437,7 @@ void handleJSON() {
   doc["current_session_time"] = currentSessionStr;
   doc["previous_session_time"] = previousSessionStr;
   doc["total_uptime"] = formatTime(millis());
-  doc["sensor_status"] = digitalRead(sensorPins[0]) == HIGH ? "MOTION" : "CLEAR";
+  doc["sensor_status"] = digitalRead(sensorPins[0]) == LOW ? "MOTION" : "CLEAR";
 
   String buf;
   serializeJson(doc, buf);
