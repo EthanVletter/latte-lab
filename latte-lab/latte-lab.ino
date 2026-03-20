@@ -248,7 +248,7 @@ void loop() {
   // Control the Status LED based on the motion flag
   if (motionDetected) {
     // Flash the LED as a warning while motion is actively happening
-    if (millis() - lastLedBlink >= 500) { // Flashes every half-second
+    if (millis() - lastLedBlink >= 400) { // Flashes every half-second
       lastLedBlink = millis();
       ledState = !ledState;
       digitalWrite(statusLedPin, ledState ? HIGH : LOW); // LOW is ON
@@ -370,9 +370,14 @@ void sendMqttUpdate() {
 
 
 void reconnectMQTT() {
+  static int retryAttempt = 0;
+
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection to: ");
     Serial.println(usePrimaryMQTT ? mqtt_server_1 : mqtt_server_2);
+
+    // Make sure LED is off before connection attempt
+    digitalWrite(statusLedPin, HIGH); // LOW is ON
 
     // Explicitly aim at the current target before trying
     client.setServer(usePrimaryMQTT ? mqtt_server_1 : mqtt_server_2, 1883);
@@ -383,24 +388,29 @@ void reconnectMQTT() {
       Serial.print("failed, rc=");
       Serial.println(client.state());
 
-      // // Fast blink 4 times (equals 2000ms delay)
-      // for (int i = 0; i < 4; i++) {
-      //   digitalWrite(statusLedPin, LOW);  // ON
-      //   delay(250);
-      //   digitalWrite(statusLedPin, HIGH); // OFF
-      //   delay(250);
-      // }
+      retryAttempt++;
 
-          // Flash the LED while the connection is not set
-      if (millis() - lastLedBlink >= 400) { // Flashes every half-second
-        lastLedBlink = millis();
-        ledState = !ledState;
-        digitalWrite(statusLedPin, ledState ? HIGH : LOW); // LOW is ON
+      // Fast blink 2 times (equals 800ms delay)
+      for (int i = 0; i < 2; i++) {
+        digitalWrite(statusLedPin, LOW);  // ON
+        delay(200);
+        digitalWrite(statusLedPin, HIGH); // OFF
+        delay(200);
       }
 
+      // Flash the LED while the connection is not set
+      // if (millis() - lastLedBlink >= 400) { // Flashes every half-second
+      //   lastLedBlink = millis();
+      //   ledState = !ledState;
+      //   digitalWrite(statusLedPin, ledState ? HIGH : LOW); // LOW is ON
+      // }
+
       // FLIP THE SWITCH: Change target to the OTHER laptop for the next loop!
-      usePrimaryMQTT = !usePrimaryMQTT; 
-      Serial.println("Switching target to the other MQTT server...");
+      if(retryAttempt >= 4) {
+        usePrimaryMQTT = !usePrimaryMQTT; 
+        Serial.println("Switching target to the other MQTT server...");
+        retryAttempt = 0;
+      } 
     }
   }
 }
