@@ -30,7 +30,7 @@ WebServer server(80);
 // ==========================================
 // Sensors
 const int numSensors = 4;
-const int sensorPins[] = {22, 19, 18, 4}; // Pin 5 defaults to 1 when disconnected, removed
+const int sensorPins[] = {22, 19, 4, 18};
 
 // Buttons
 const int numButtons = 4;
