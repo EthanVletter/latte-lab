@@ -75,6 +75,9 @@ String lastMotorActivation = "Never";
 String lastSensorTrigger[numSensors];
 String lastButtonTrigger[numButtons];
 bool lastBtnStates[numButtons] = {HIGH, HIGH, HIGH, HIGH};
+unsigned long lastMotorStartMillis = 0;
+const unsigned long sensorGracePeriod = 3000;
+bool ignoreSensors = false; // Tells the system to temporarily blind the sensors
 
 // LED State Tracking
 unsigned long lastLedBlink = 0;
@@ -228,19 +231,38 @@ void loop() {
   }
 
   // --- MOTION SENSOR LOGIC ---
+
+  // Check if the belt is currently clear
+  bool anySensorBlocked = false;
+  for (int i = 0; i < numSensors; i++) {
+    if (digitalRead(sensorPins[i]) == LOW) {
+    // if (digitalRead(sensorPins[i]) == HIGH) {
+      anySensorBlocked = true; 
+    }
+  }
+
+  // If all sensors are clear, re-arm them
+  if (anySensorBlocked == false) {
+    ignoreSensors = false; 
+  }
+
   bool motionDetected = false;
   for (int i = 0; i < numSensors; i++) {
     // Only allow sensors to trigger if Master Button is IN
     if (digitalRead(sensorPins[i]) == LOW && mainBtnActive == true) {
+    // if (digitalRead(sensorPins[i]) == HIGH && mainBtnActive == true) {
       lastSensorTrigger[i] = getTimestamp();
       motionDetected = true;
       
-      if (motorRunning) {
-        motorRunning = false;
-        lastTrigger = "Sensor " + String(i + 1);
-        previousSessionStr = formatTime(millis() - motorStartTime);
-        currentSessionStr = "00:00:00";
-        sendMqttUpdate(); 
+      if (motorRunning && ignoreSensors == false) {
+          // Only stop the motor if the grace period has passed
+          delay(600);
+
+          motorRunning = false;
+          lastTrigger = "Sensor " + String(i + 1);
+          previousSessionStr = formatTime(millis() - motorStartTime);
+          currentSessionStr = "00:00:00";
+          sendMqttUpdate(); 
       }
     }
   }
@@ -287,10 +309,17 @@ void loop() {
 void startMotor(String source) {
   if (!motorRunning) {
     motorRunning = true;
+
+    // Mute the sensors so the object can move away
+    ignoreSensors = true;
+
     lastTrigger = source;
     motorStartTime = millis();
     lastMotorActivation = getTimestamp();
     targetPWM = 1023; // Set goal to full speed
+
+    // Record the start time for the grace period
+    lastMotorStartMillis = millis();
 
     if (forwardDirection) {
       digitalWrite(motorIn1, HIGH);
@@ -360,6 +389,7 @@ void sendMqttUpdate() {
     String topic = "factory/sensor" + String(i+1);
     
     snrDoc["status"] = (digitalRead(sensorPins[i]) == LOW) ? "MOTION" : "CLEAR";
+    // snrDoc["status"] = (digitalRead(sensorPins[i]) == HIGH) ? "MOTION" : "CLEAR";
     snrDoc["last_activated"] = lastSensorTrigger[i]; 
     
     char snrBuffer[128];
@@ -447,7 +477,8 @@ void handleJSON() {
   doc["current_session_time"] = currentSessionStr;
   doc["previous_session_time"] = previousSessionStr;
   doc["total_uptime"] = formatTime(millis());
-  doc["sensor_status"] = digitalRead(sensorPins[0]) == LOW ? "MOTION" : "CLEAR";
+  // doc["sensor_status"] = digitalRead(sensorPins[0]) == LOW ? "MOTION" : "CLEAR";
+  doc["sensor_status"] = digitalRead(sensorPins[0]) == HIGH ? "MOTION" : "CLEAR";
 
   String buf;
   serializeJson(doc, buf);
