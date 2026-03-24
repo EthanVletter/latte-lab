@@ -30,7 +30,7 @@ WebServer server(80);
 // ==========================================
 // Sensors
 const int numSensors = 4;
-const int sensorPins[] = {22, 19, 18, 4}; // Pin 5 defaults to 1 when disconnected, removed
+const int sensorPins[] = {22, 19, 4, 18};
 
 // Buttons
 const int numButtons = 4;
@@ -75,10 +75,16 @@ String lastMotorActivation = "Never";
 String lastSensorTrigger[numSensors];
 String lastButtonTrigger[numButtons];
 bool lastBtnStates[numButtons] = {HIGH, HIGH, HIGH, HIGH};
+unsigned long lastMotorStartMillis = 0;
+const unsigned long sensorGracePeriod = 3000;
+bool ignoreSensors = false; // Tells the system to temporarily blind the sensors
 
 // LED State Tracking
 unsigned long lastLedBlink = 0;
 bool ledState = false;
+
+// A global toggle to remember which server we are currently looking for
+bool usePrimaryMQTT = true;
 
 // ==========================================
 // SETUP ROUTINE
@@ -137,14 +143,14 @@ void setup() {
   Serial.println("NTP time synced!");
 
   // Setup MQTT & Web Server
-  client.setServer(mqtt_server, 1883);
+  // client.setServer(mqtt_server_1, 1883);
   server.on("/", handleRoot);
   server.on("/data", handleJSON);
   server.begin();
   MDNS.begin("latte-lab");
 
   // System is online: ensure LED is ON
-  digitalWrite(statusLedPin, LOW);
+  // digitalWrite(statusLedPin, LOW);
 }
 
 // ==========================================
@@ -156,6 +162,9 @@ void loop() {
   // Maintain MQTT Connection
   if (!client.connected()) {
     reconnectMQTT();
+
+    // System is online: ensure LED is ON
+    digitalWrite(statusLedPin, LOW);
   }
   client.loop();
 
@@ -222,19 +231,38 @@ void loop() {
   }
 
   // --- MOTION SENSOR LOGIC ---
+
+  // Check if the belt is currently clear
+  bool anySensorBlocked = false;
+  for (int i = 0; i < numSensors; i++) {
+    if (digitalRead(sensorPins[i]) == LOW) {
+    // if (digitalRead(sensorPins[i]) == HIGH) {
+      anySensorBlocked = true; 
+    }
+  }
+
+  // If all sensors are clear, re-arm them
+  if (anySensorBlocked == false) {
+    ignoreSensors = false; 
+  }
+
   bool motionDetected = false;
   for (int i = 0; i < numSensors; i++) {
     // Only allow sensors to trigger if Master Button is IN
-    if (digitalRead(sensorPins[i]) == HIGH && mainBtnActive == true) {
+    if (digitalRead(sensorPins[i]) == LOW && mainBtnActive == true) {
+    // if (digitalRead(sensorPins[i]) == HIGH && mainBtnActive == true) {
       lastSensorTrigger[i] = getTimestamp();
       motionDetected = true;
       
-      if (motorRunning) {
-        motorRunning = false;
-        lastTrigger = "Sensor " + String(i + 1);
-        previousSessionStr = formatTime(millis() - motorStartTime);
-        currentSessionStr = "00:00:00";
-        sendMqttUpdate(); 
+      if (motorRunning && ignoreSensors == false) {
+          // Only stop the motor if the grace period has passed
+          delay(600);
+
+          motorRunning = false;
+          lastTrigger = "Sensor " + String(i + 1);
+          previousSessionStr = formatTime(millis() - motorStartTime);
+          currentSessionStr = "00:00:00";
+          sendMqttUpdate(); 
       }
     }
   }
@@ -242,7 +270,7 @@ void loop() {
   // Control the Status LED based on the motion flag
   if (motionDetected) {
     // Flash the LED as a warning while motion is actively happening
-    if (millis() - lastLedBlink >= 500) { // Flashes every half-second
+    if (millis() - lastLedBlink >= 400) { // Flashes every half-second
       lastLedBlink = millis();
       ledState = !ledState;
       digitalWrite(statusLedPin, ledState ? HIGH : LOW); // LOW is ON
@@ -281,10 +309,17 @@ void loop() {
 void startMotor(String source) {
   if (!motorRunning) {
     motorRunning = true;
+
+    // Mute the sensors so the object can move away
+    ignoreSensors = true;
+
     lastTrigger = source;
     motorStartTime = millis();
     lastMotorActivation = getTimestamp();
     targetPWM = 1023; // Set goal to full speed
+
+    // Record the start time for the grace period
+    lastMotorStartMillis = millis();
 
     if (forwardDirection) {
       digitalWrite(motorIn1, HIGH);
@@ -353,7 +388,8 @@ void sendMqttUpdate() {
     StaticJsonDocument<128> snrDoc;
     String topic = "factory/sensor" + String(i+1);
     
-    snrDoc["status"] = (digitalRead(sensorPins[i]) == HIGH) ? "MOTION" : "CLEAR";
+    snrDoc["status"] = (digitalRead(sensorPins[i]) == LOW) ? "MOTION" : "CLEAR";
+    // snrDoc["status"] = (digitalRead(sensorPins[i]) == HIGH) ? "MOTION" : "CLEAR";
     snrDoc["last_activated"] = lastSensorTrigger[i]; 
     
     char snrBuffer[128];
@@ -362,9 +398,19 @@ void sendMqttUpdate() {
   }
 }
 
+
 void reconnectMQTT() {
+  static int retryAttempt = 0;
+
   while (!client.connected()) {
-    Serial.println("Attempting MQTT connection...");
+    Serial.print("Attempting MQTT connection to: ");
+    Serial.println(usePrimaryMQTT ? mqtt_server_1 : mqtt_server_2);
+
+    // Make sure LED is off before connection attempt
+    digitalWrite(statusLedPin, HIGH); // LOW is ON
+
+    // Explicitly aim at the current target before trying
+    client.setServer(usePrimaryMQTT ? mqtt_server_1 : mqtt_server_2, 1883);
     
     if (client.connect("ESP32_Motor_Unit")) {
       Serial.println("connected");
@@ -372,13 +418,29 @@ void reconnectMQTT() {
       Serial.print("failed, rc=");
       Serial.println(client.state());
 
-      // Fast blink 4 times (equals 2000ms delay)
-      for (int i = 0; i < 4; i++) {
+      retryAttempt++;
+
+      // Fast blink 2 times (equals 800ms delay)
+      for (int i = 0; i < 2; i++) {
         digitalWrite(statusLedPin, LOW);  // ON
-        delay(250);
+        delay(200);
         digitalWrite(statusLedPin, HIGH); // OFF
-        delay(250);
+        delay(200);
       }
+
+      // Flash the LED while the connection is not set
+      // if (millis() - lastLedBlink >= 400) { // Flashes every half-second
+      //   lastLedBlink = millis();
+      //   ledState = !ledState;
+      //   digitalWrite(statusLedPin, ledState ? HIGH : LOW); // LOW is ON
+      // }
+
+      // FLIP THE SWITCH: Change target to the OTHER laptop for the next loop!
+      if(retryAttempt >= 4) {
+        usePrimaryMQTT = !usePrimaryMQTT; 
+        Serial.println("Switching target to the other MQTT server...");
+        retryAttempt = 0;
+      } 
     }
   }
 }
@@ -415,6 +477,7 @@ void handleJSON() {
   doc["current_session_time"] = currentSessionStr;
   doc["previous_session_time"] = previousSessionStr;
   doc["total_uptime"] = formatTime(millis());
+  // doc["sensor_status"] = digitalRead(sensorPins[0]) == LOW ? "MOTION" : "CLEAR";
   doc["sensor_status"] = digitalRead(sensorPins[0]) == HIGH ? "MOTION" : "CLEAR";
 
   String buf;
