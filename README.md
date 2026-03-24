@@ -2,7 +2,13 @@
 
 A miniature conveyor belt system demonstrating the future of shopfloor automation. This project showcases a full-scale IIoT (Industrial Internet of Things) pipeline: from ESP32-driven physical motor control to real-time data visualization within SAP via MQTT and OPC-UA
 
-## Visuals
+## Final Product
+
+<div align="center">
+    <img src="./images/visual-13.jpeg" alt="visual-13" width="600" height="450">
+</div>
+
+## Other Visuals
 
 <!-- - ![visual-1](./images/visual-1.jpeg)
 - ![visual-7](./images/visual-7.jpeg)
@@ -41,7 +47,7 @@ A miniature conveyor belt system demonstrating the future of shopfloor automatio
 
 ## Wiring & Grounding Tips
 
-Correct grounding is critical to prevent ESP32 "brownouts" or sensor interference.
+Correct grounding is critical to prevent ESP32 "burnouts" or sensor interference.
 
 > **Crucial Note:** Ensure the ESP32 Ground and the Motor Power Supply Ground are connected (Common Ground).
 
@@ -50,7 +56,7 @@ Correct grounding is critical to prevent ESP32 "brownouts" or sensor interferenc
 | Type           | Colors (In order of priority) |
 | :------------- | :---------------------------- |
 | **Ground**     | Black, Brown, Purple          |
-| **VCC (3.3V)** | Red, Orange, White            |
+| **VCC (3.3V)** | Red, Orange, White/Gray       |
 | **Functions**  | Yellow, Blue, Green           |
 
 _Note: Button wiring is pre-configured where Red is Power and Black is Ground._

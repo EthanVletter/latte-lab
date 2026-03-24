@@ -12,16 +12,23 @@ To get the **Latte Lab** ecosystem running, ensure the following software is ins
 | **CP210x Driver** | Universal                 | ESP32 USB-to-Serial communication.    | [Download](https://www.silabs.com/software-and-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads) |
 | **Mosquitto**     | 2.1.2-install-windows.exe | MQTT Broker to handle messaging.      | [Download](https://mosquitto.org/download/)                                                        |
 | **MQTT Explorer** | Latest                    | Visualizing MQTT traffic & debugging. | [Download](http://mqtt-explorer.com/)                                                              |
+| **Bonjour**       | Print Services for Win    | Enables mDNS (latte-lab.local).       | [Download](https://support.apple.com/kb/DL999)                                                     |
 
 <!-- | **OpenVPN**       | Latest    | Secure remote connection to the server. | [Download](https://openvpn.net/community-downloads/)                                               | -->
 
-## Driver Installation
+## Driver & Bonjour Installation
 
 If your computer doesn't detect the ESP32 via USB:
 
 1. Download the **CP210x_Universal_Windows_Driver**.
 2. Extract the folder, right-click the `.inf` file, and select **Install**.
 3. Restart the Arduino IDE.
+
+To ensure your Windows PC can resolve local network hostnames (like `latte-lab.local`):
+
+1. Download **Bonjour Print Services for Windows** from the Apple Support link above.
+2. Run the installer and follow the standard on-screen prompts.
+3. Restart your computer to ensure the mDNS responder service is actively running.
 
 ---
 
@@ -81,6 +88,24 @@ const char* mqtt_server = "my-pc.local";     // Your PC Name or IP Address
 
 ## 3. Server & Network Configuration
 
+### Mosquitto Broker Configuration (mosquitto.conf)
+
+By default, newer versions of Mosquitto block external connections and require authentication. You must edit the configuration file to allow the ESP32 to connect.
+
+1. Click the Windows Start Menu, type **Notepad**, right-click it, and select **Run as administrator**.
+2. Go to **File > Open** and navigate to your Mosquitto installation directory (usually `C:\Program Files\mosquitto`).
+3. Change the file type dropdown in the bottom right from "Text Documents" to "**All Files**".
+4. Open the `mosquitto.conf` file.
+5. Scroll to the bottom of the document and add the following two lines to enable the listener and allow external devices to connect without a password:
+
+```bash
+listener 1883
+allow_anonymous true
+```
+
+6. Save the file (**Ctrl + S**) and close Notepad.
+7. Open Windows Services (`services.msc`), find **Mosquitto Broker**, right-click it, and select **Restart** to apply the changes.
+
 ### Firewall Setup (Port 1883)
 
 To allow the ESP32 to communicate with Mosquitto, you must open the port:
@@ -90,6 +115,20 @@ To allow the ESP32 to communicate with Mosquitto, you must open the port:
 3. Select **Port** -> **TCP**.
 4. Set the specific local port to **1883**.
 5. Select **Allow the connection** and name it: `"MQTT Broker (Mosquitto)"`.
+
+### Fallback: Restarting Port 1883 via CMD
+
+If Mosquitto fails to connect, or if the port gets stuck in a "**listening**" state from a crashed session, you can forcefully restart the service using the Command Prompt.
+
+1. Click the Windows Start Menu, type **cmd**, right-click **Command Prompt**, and select **Run as administrator**.
+2. Type the following command to find the service:
+    ```bash
+    netstat -ano | findstr :1883
+    ```
+3. Type the following command to kill the service:
+    ```bash
+    taskkill /PID <YourPIDNumber>
+    ```
 
 ### Remote Access
 
