@@ -8,6 +8,19 @@ A miniature conveyor belt system demonstrating the future of shopfloor automatio
     <img src="./images/visual-13.jpeg" alt="visual-13" width="600" height="450">
 </div>
 
+## Convention
+
+<div align="center">
+    <img src="./images/convention-1.jpeg" alt="convention-1" width="600" height="450">
+    <img src="./images/convention-3.jpeg" alt="convention-3" width="600" height="450">
+    <img src="./images/convention-5.jpeg" alt="convention-5" width="600" height="450">
+    <img src="./images/convention-7.jpeg" alt="convention-7" width="600" height="450">
+    <img src="./images/convention-8.jpeg" alt="convention-8" width="600" height="450">
+    <img src="./images/convention-9.jpeg" alt="convention-9" width="600" height="450">
+    <img src="./images/convention-10.jpeg" alt="convention-10" width="600" height="450">
+    <img src="./images/convention-11.jpeg" alt="convention-11" width="600" height="450">
+</div>
+
 ## Other Visuals
 
 <!-- - ![visual-1](./images/visual-1.jpeg)
@@ -18,20 +31,14 @@ A miniature conveyor belt system demonstrating the future of shopfloor automatio
 
 <div align="center">
     <img src="./images/visual-1.jpeg" alt="visual-1" width="600" height="450">
-</div>
-<div align="center">
     <img src="./images/visual-7.jpeg" alt="visual-7" width="600" height="450">
-</div>
-<div align="center">
     <img src="./images/visual-6.jpeg" alt="visual-6" width="600" height="450">
-</div>
-<div align="center">
     <img src="./images/visual-12.jpeg" alt="visual-12" width="600" height="450">
 </div>
 
 </p>
 
-## Components Used
+<!-- ## Components Used
 
 | Component                   | Description                                   | Purchase Link                                                   |
 | :-------------------------- | :-------------------------------------------- | :-------------------------------------------------------------- |
@@ -39,7 +46,7 @@ A miniature conveyor belt system demonstrating the future of shopfloor automatio
 | **L298N Motor Driver**      | Dual H-Bridge driver for DC motor control.    | [View on Amazon](https://www.amazon.com/s?k=L298N+motor+driver) |
 | **DC Gear Motor**           | 6V-12V Motor for conveyor belt drive.         | [Insert link]()                                                 |
 | **PIR Motion Sensors**      | Infrared sensors for motion/object detection. | [Insert link]()                                                 |
-| **Industrial Push Buttons** | Manual override and start/stop controls.      | [Insert link]()                                                 |
+| **Industrial Push Buttons** | Manual override and start/stop controls.      | [Insert link]()                                                 | -->
 
 ## Installation Manual
 

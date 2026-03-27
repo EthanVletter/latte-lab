@@ -14,7 +14,7 @@ To get the **Latte Lab** ecosystem running, ensure the following software is ins
 | **MQTT Explorer** | Latest                    | Visualizing MQTT traffic & debugging. | [Download](http://mqtt-explorer.com/)                                                              |
 | **Bonjour**       | Print Services for Win    | Enables mDNS (latte-lab.local).       | [Download](https://support.apple.com/kb/DL999)                                                     |
 
-<!-- | **OpenVPN**       | Latest    | Secure remote connection to the server. | [Download](https://openvpn.net/community-downloads/)                                               | -->
+| **OpenVPN** | Latest | Secure remote connection to the server. | [Download](https://openvpn.net/community-downloads/) |
 
 ## Driver & Bonjour Installation
 
@@ -61,7 +61,8 @@ Install these via the Library Manager (**Ctrl + Shift + I**):
 const char* ssid = "Wifi@123";               // Your WiFi Name
 const char* password = "password@123";       // Your WiFi Password
 // const char* mqtt_server = "192.168.56.1";
-const char* mqtt_server = "my-pc.local";     // Your PC Name or IP Address
+const char* mqtt_server_1 = "my-pc.local";     // Your PC Name or IP Address
+const char* mqtt_server_2 = "my-pc2.local";     // Your PC Name or IP Address
 
 #endif
 ```
