@@ -6,15 +6,14 @@ To get the **Latte Lab** ecosystem running, ensure the following software is ins
 
 ### Software Download Table
 
-| Software          | Version                   | Purpose                               | Download Link                                                                                      |
-| :---------------- | :------------------------ | :------------------------------------ | :------------------------------------------------------------------------------------------------- |
-| **Arduino IDE**   | 2.x+                      | Firmware development & uploading.     | [Download](https://www.arduino.cc/en/software)                                                     |
-| **CP210x Driver** | Universal                 | ESP32 USB-to-Serial communication.    | [Download](https://www.silabs.com/software-and-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads) |
-| **Mosquitto**     | 2.1.2-install-windows.exe | MQTT Broker to handle messaging.      | [Download](https://mosquitto.org/download/)                                                        |
-| **MQTT Explorer** | Latest                    | Visualizing MQTT traffic & debugging. | [Download](http://mqtt-explorer.com/)                                                              |
-| **Bonjour**       | Print Services for Win    | Enables mDNS (latte-lab.local).       | [Download](https://support.apple.com/kb/DL999)                                                     |
-
-| **OpenVPN** | Latest | Secure remote connection to the server. | [Download](https://openvpn.net/community-downloads/) |
+| Software          | Version                   | Purpose                                 | Download Link                                                                                      |
+| :---------------- | :------------------------ | :-------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| **Arduino IDE**   | 2.x+                      | Firmware development & uploading.       | [Download](https://www.arduino.cc/en/software)                                                     |
+| **CP210x Driver** | Universal                 | ESP32 USB-to-Serial communication.      | [Download](https://www.silabs.com/software-and-tools/usb-to-uart-bridge-vcp-drivers?tab=downloads) |
+| **Mosquitto**     | 2.1.2-install-windows.exe | MQTT Broker to handle messaging.        | [Download](https://mosquitto.org/download/)                                                        |
+| **MQTT Explorer** | Latest                    | Visualizing MQTT traffic & debugging.   | [Download](http://mqtt-explorer.com/)                                                              |
+| **Bonjour**       | Print Services for Win    | Enables mDNS (latte-lab.local).         | [Download](https://support.apple.com/kb/DL999)                                                     |
+| **OpenVPN**       | Latest                    | Secure remote connection to the server. | [Download](https://openvpn.net/community-downloads/)                                               |
 
 ## Driver & Bonjour Installation
 
